@@ -10,6 +10,7 @@ export function capitalizeWords(str: string) {
 }
 
 export function generateClientSideUserProperties(user: User) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password, ...rest } = user;
   return rest;
 }

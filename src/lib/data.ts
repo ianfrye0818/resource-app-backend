@@ -18,7 +18,7 @@ if it is a resume, can you please parse it into a json object with the following
     }
 
 
-Please clean up any grammatical errors and ensure that the resume and summary sound professional.
+Please clean up any grammatical errors and ensure that the resume and summary sound professional. If the resume does not have duties listed with the job, please create a few based on the job title. Also, if it has a summary, please ignore this and create a new one based on the resume content. 
 ${cleanedDocument}
 `;
 };

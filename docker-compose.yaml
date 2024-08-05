@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+  backend:
+    container_name: resource-apps-backend
+    image: biggiefrye45/resource-apps-backend:latest
+    env_file:
+      - .env
+    networks:
+      - resource_apps_default
+    ports:
+      - 8890:5001
+    volumes:
+      - /docker/appdata/resource-apps-backend/backend:/app
+    restart: unless-stopped
+
+networks:
+  resource_apps_default:
+    external: true
