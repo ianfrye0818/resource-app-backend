@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  userId    String    @id @default(cuid())
+  firstName String
+  lastName  String
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+  isActive  Boolean   @default(true)
+  role      Role      @default(USER)
+
+  permissions   PermissionList[] @default([])
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
+}
+
+enum Role {
+  SUPER_ADMIN
+  COMPANY_OWNER
+  ADMIN
+  USER
+}
+
+enum PermissionList {
+  CREATE_USER
+  UPDATE_USER
+  DELETE_USER
+  CREATE_PERMISSION
+  UPDATE_PERMISSION
+  DELETE_PERMISSION
+  CREATE_ROLE
+  UPDATE_ROLE
+  DELETE_ROLE
+  GENERATE_RESUME
+  GENERATE_QR_CODE
+}
