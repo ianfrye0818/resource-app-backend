@@ -1,5 +1,5 @@
-name: Github actions Demo
-run-name: ${{ github.actor}} is testing out Github Actions 🚀
+name: Docker Hub Production Deployment
+run-name: ${{ github.actor}} Pushing to production
 
 on:
   push:
