@@ -4,6 +4,7 @@ run-name: ${{ github.actor}} Pushing to production
 on:
   push:
     branches: [production]
+  workflow_dispatch:
 
 jobs:
   build-and-push:
