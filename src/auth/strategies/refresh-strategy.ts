@@ -6,7 +6,7 @@ import { Request } from 'express';
 export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
   constructor() {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([extractJWT]),
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_REFRESH_SECRET,
     });
@@ -16,4 +16,19 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
     const { iat, exp, ...user } = payload;
     return user as ClientUser;
   }
+}
+
+function extractJWT(req: Request): string | null {
+  console.log('refreshing token');
+  if (req.cookies && req.cookies.refreshToken) {
+    return req.cookies.refreshToken;
+  }
+  if (req.headers.authorization) {
+    return req.headers.authorization.replace('Bearer ', '');
+  }
+
+  if (req.body && req.body.refreshToken) {
+    return req.body.refreshToken;
+  }
+  return null;
 }

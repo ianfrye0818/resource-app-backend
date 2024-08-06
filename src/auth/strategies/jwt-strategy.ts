@@ -7,7 +7,7 @@ import { env } from '../../../env';
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor() {
     super({
-      jwtFromRequest: ExtractJwt.fromExtractors([extractJwtFromCookie]),
+      jwtFromRequest: ExtractJwt.fromExtractors([extractJWT]),
       ignoreExpiration: true,
       secretOrKey: env.JWT_SECRET,
     });
@@ -18,7 +18,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     return user as ClientUser;
   }
 }
-function extractJwtFromCookie(req: Request): string | null {
+function extractJWT(req: Request): string | null {
   if (req.cookies && req.cookies.accessToken) {
     return req.cookies.accessToken;
   }
