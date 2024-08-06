@@ -37,4 +37,7 @@ export const ErrorMessages = {
   InvalidModel: 'Invalid AI Model Type',
   InvalidFileType:
     'Invalid file type. Only PDF, DOCX, and DOC files are allowed.',
+  Unauthorized: 'You are not authroized to access this resource',
+  UserExists: 'One or more users already exist',
+  NotFound: 'The resource you are trying to access was not found',
 };

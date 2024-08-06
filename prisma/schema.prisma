@@ -21,6 +21,18 @@ model User {
 
   permissions   PermissionList[] @default([])
   refreshTokens RefreshToken[]
+  qrCodes       QR_Codes[]
+  firstLogin    Boolean @default(true)
+}
+
+model QR_Codes {
+  id        String   @id @default(cuid())
+  userId    String
+  qrCode    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
 
 model RefreshToken {
@@ -34,8 +46,6 @@ model RefreshToken {
 }
 
 enum Role {
-  SUPER_ADMIN
-  COMPANY_OWNER
   ADMIN
   USER
 }

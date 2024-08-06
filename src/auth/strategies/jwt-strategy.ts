@@ -22,5 +22,8 @@ function extractJwtFromCookie(req: Request): string | null {
   if (req.cookies && req.cookies.accessToken) {
     return req.cookies.accessToken;
   }
+  if (req.headers.authorization) {
+    return req.headers.authorization.replace('Bearer ', '');
+  }
   return null;
 }

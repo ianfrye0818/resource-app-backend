@@ -8,10 +8,9 @@ import {
   IsEnum,
   IsBoolean,
   IsDate,
-  IsArray,
 } from 'class-validator';
 
-export class createUserDTO {
+export class CreateUserDTO {
   @IsString()
   firstName: string;
 
@@ -34,12 +33,12 @@ export class createUserDTO {
   isActive?: boolean;
 }
 
-export class updateUserDTO extends PartialType(createUserDTO) {
+export class UpdateUserDTO extends PartialType(CreateUserDTO) {
   @IsOptional()
   @IsDate()
   deletedAt?: Date;
 
   @IsOptional()
-  @IsEnum(PermissionList, { each: true })
-  permissions?: PermissionList[];
+  @IsBoolean()
+  firstLogin?: boolean;
 }

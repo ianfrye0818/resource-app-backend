@@ -45,3 +45,13 @@ export function getFormattedDate() {
 export function cleanJsonString(jsonString: string) {
   return jsonString.replace(/```json|```/g, '');
 }
+
+export function convertBoolean(value: any) {
+  if (typeof value === 'string') {
+    const normalizedValue = value.trim().toLowerCase();
+    if (normalizedValue === 'true') return true;
+    if (normalizedValue === 'false') return false;
+  }
+
+  return value;
+}

@@ -7,6 +7,7 @@ import { PrismaService } from './core-services/prisma-service.service';
 import { UserModule } from './user/user.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { ResumeParserModule } from './resume-parser/resume-parser.module';
+import { QrCodeModule } from './qr_code/qr_code.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ResumeParserModule } from './resume-parser/resume-parser.module';
     UserModule,
     PermissionsModule,
     ResumeParserModule,
+    QrCodeModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

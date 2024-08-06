@@ -1,25 +1,34 @@
 import {
+  BadRequestException,
+  ConflictException,
   HttpException,
+  HttpStatus,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { createUserDTO, updateUserDTO } from './dto/createUser.dto';
 import * as bcrypt from 'bcryptjs';
 import { Cron } from '@nestjs/schedule';
-import { Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { FilterUserDTO } from './dto/filterUser.dto';
 import { PrismaService } from 'src/core-services/prisma-service.service';
 import { generateClientSideUserProperties } from 'src/lib/utils';
+import { CSVParserService } from 'src/core-services/csv-parser.service';
+import { ErrorMessages } from 'src/lib/data';
+import { CreateUserDTO } from './dto/createUser.dto';
+import { CreateUserSchema } from 'src/lib/zod-schemas';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class UserService {
   constructor(
     private prismaService: PrismaService,
+    private csvParserService: CSVParserService,
     // private emailService: EmailService,
   ) {}
 
-  async findAllUsers(filter: FilterUserDTO) {
+  async findAllUsers(filter: FilterUserDTO = {}) {
     const { take, skip, sort, roles, ...otherFilters } = filter;
     try {
       const users = await this.prismaService.user.findMany({
@@ -39,7 +48,7 @@ export class UserService {
       return users.map((user) => generateClientSideUserProperties(user));
     } catch (error) {
       console.error(error);
-      throw new HttpException('Something went wrong', 500);
+      throw new HttpException(ErrorMessages.Unknown, 500);
     }
   }
 
@@ -48,6 +57,7 @@ export class UserService {
       const user = await this.prismaService.user.findUnique({
         where: { userId },
       });
+
       return generateClientSideUserProperties(user);
     } catch (error) {
       console.error(error);
@@ -56,7 +66,7 @@ export class UserService {
         error instanceof NotFoundException
       )
         throw error;
-      throw new HttpException('Something went wrong', 500);
+      throw new HttpException(ErrorMessages.Unknown, 500);
     }
   }
 
@@ -67,11 +77,11 @@ export class UserService {
       });
     } catch (error) {
       console.error(error);
-      throw new HttpException('Something went wrong', 500);
+      throw new HttpException(ErrorMessages.Unknown, 500);
     }
   }
 
-  async create(data: createUserDTO) {
+  async create(data: CreateUserDTO) {
     const { password, ...userData } = data;
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -92,17 +102,86 @@ export class UserService {
     if (error.code === 'P2002') {
       throw new HttpException('User already exists', 400);
     }
-    if ((error.statusCode = 400)) {
-      throw error;
-    }
-    throw new HttpException('Something went wrong', 500);
+    throw new HttpException(ErrorMessages.Unknown, 500);
   }
 
-  async updateUserById(userId: string, data: updateUserDTO) {
+  async parseAndCreateUsers(file: Express.Multer.File) {
     try {
-      await this.findOneById(userId);
+      const headerMapping = {
+        'First Name': 'firstName',
+        'Last Name': 'lastName',
+        Email: 'email',
+        Password: 'password',
+        Role: 'role',
+        Active: 'isActive',
+      };
 
-      if (data.password) data.password = await bcrypt.hash(data.password, 10);
+      const users = await this.csvParserService.parseCSV(file, headerMapping);
+
+      const parsedUsers = users.map((user) => {
+        const { error } = CreateUserSchema.safeParse(user);
+        if (error) {
+          throw new HttpException(
+            error.errors.map((err) => ({
+              zodError: err.code,
+              message:
+                err.path.map((path) => path.toLocaleString()).join(' -> ') +
+                ' ' +
+                err.message,
+            })),
+            400,
+          );
+        }
+        return user;
+      });
+
+      await Promise.all(parsedUsers.map((user) => this.create(user as User)));
+      return HttpStatus.OK;
+    } catch (error) {
+      console.error(['parseAndCreateUsers error:'], error);
+
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+
+      if (error.code === 'P2002' || error.code === 'P2020') {
+        throw new ConflictException(ErrorMessages.UserExists);
+      }
+
+      if (error instanceof HttpException) {
+        throw error;
+      }
+
+      throw new InternalServerErrorException(ErrorMessages.Unknown);
+    }
+  }
+
+  async exportUsersToCSV() {
+    try {
+      const users = await this.findAllUsers();
+
+      const headers = [
+        { id: 'userId' as const, title: 'User ID' },
+        { id: 'firstName' as const, title: 'First Name' },
+        { id: 'lastName' as const, title: 'Last Name' },
+        { id: 'email' as const, title: 'Email' },
+        { id: 'role' as const, title: 'Role' },
+        { id: 'isActive' as const, title: 'Active' },
+        { id: 'permissions' as const, title: 'Permissions' },
+      ];
+
+      return await this.csvParserService.exportToCSV(users, 'users', headers);
+    } catch (error) {
+      console.error(['exportUsersToCSV'], error);
+      throw new HttpException(ErrorMessages.Unknown, 500);
+    }
+  }
+
+  async updateUserById(userId: string, data: Prisma.UserUpdateInput) {
+    try {
+      if (data.password) {
+        data.password = await bcrypt.hash(data.password as string, 10);
+      }
 
       const updatedUser = await this.prismaService.user.update({
         where: { userId },
@@ -111,27 +190,37 @@ export class UserService {
 
       return generateClientSideUserProperties(updatedUser);
     } catch (error) {
-      console.error(error);
-      if (
-        error instanceof UnauthorizedException ||
-        error instanceof NotFoundException
-      )
-        throw error;
-      throw new HttpException('Something went wrong', 500);
+      console.error(['updateByEmail'], error);
+      if (error.code === 'P2020') {
+        throw new HttpException('User not found', 404);
+      }
+      throw new InternalServerErrorException(ErrorMessages.Unknown);
     }
   }
 
   async updateByEmail(email: string, data: Prisma.UserUpdateInput) {
-    if (data.password) {
-      data.password = await bcrypt.hash(data.password as string, 10);
+    try {
+      if (data.password) {
+        data.password = await bcrypt.hash(data.password as string, 10);
+      }
+
+      const updatedUser = await this.prismaService.user.update({
+        where: { email },
+        data,
+      });
+
+      return generateClientSideUserProperties(updatedUser);
+    } catch (error) {
+      console.error(['updateByEmail'], error);
+      if (error.code === 'P2020') {
+        throw new HttpException(ErrorMessages.NotFound, 404);
+      }
+      throw new InternalServerErrorException(ErrorMessages.Unknown);
     }
+  }
 
-    const updatedUser = await this.prismaService.user.update({
-      where: { email },
-      data,
-    });
-
-    return generateClientSideUserProperties(updatedUser);
+  async flipFirstLoginStatus(userId: string) {
+    return await this.updateUserById(userId, { firstLogin: false });
   }
 
   async softDeleteUserById(id: string) {

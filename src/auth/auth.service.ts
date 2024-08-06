@@ -2,7 +2,6 @@ import {
   HttpException,
   Injectable,
   InternalServerErrorException,
-  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
@@ -13,7 +12,6 @@ import { env } from '../../env';
 import { UserService } from 'src/user/user.service';
 import { ClientUser } from 'src/lib/types.';
 import { generateClientSideUserProperties } from 'src/lib/utils';
-import { createUserDTO } from 'src/user/dto/createUser.dto';
 
 @Injectable()
 export class AuthService {

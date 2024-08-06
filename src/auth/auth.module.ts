@@ -8,6 +8,7 @@ import { env } from '../../env';
 import { LocalStrategy } from './strategies/local-strategy';
 import { JwtStrategy } from './strategies/jwt-strategy';
 import { RefreshStrategy } from './strategies/refresh-strategy';
+import { CSVParserService } from 'src/core-services/csv-parser.service';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { RefreshStrategy } from './strategies/refresh-strategy';
     LocalStrategy,
     JwtStrategy,
     RefreshStrategy,
+    CSVParserService,
   ],
   exports: [AuthService],
 })

@@ -16,7 +16,7 @@ export class UpdateUserGuard implements CanActivate {
     const jwtUser = request.user as ClientUser;
     const data = request.body;
 
-    if (jwtUser.role === Role.SUPER_ADMIN) {
+    if (jwtUser.role === Role.ADMIN) {
       return true;
     }
 
@@ -24,10 +24,6 @@ export class UpdateUserGuard implements CanActivate {
 
     if (data.role) {
       throw new ForbiddenException('You cannot update roles');
-    }
-
-    if (jwtUser.role === Role.ADMIN) {
-      return true;
     }
 
     // Users can update their own info

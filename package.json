@@ -40,6 +40,8 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.6",
+    "csv-parser": "^3.0.0",
+    "csv-writer": "^1.6.0",
     "docxtemplater": "^3.49.1",
     "dotenv": "^16.4.5",
     "jsonwebtoken": "^9.0.2",

@@ -1,33 +1,26 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Param,
-  Post,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Param, Patch, UseGuards } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { AdminGuard } from 'src/core-guards/admin.guard';
 import { PermissionsService } from './permissions.service';
-import { PermissionList } from '@prisma/client';
+import { CreatePermisssionsDTO } from './dto/create-permissions.dto';
 
-@UseGuards(JwtGuard, AdminGuard)
+// @UseGuards(JwtGuard, AdminGuard)
 @Controller('user/:id/permissions')
 export class PermissionsController {
   constructor(private permissionsService: PermissionsService) {}
 
-  @Post('create')
+  @Patch('add')
   async createPermission(
     @Param('id') id: string,
-    @Body() data: { permissions: PermissionList[] },
+    @Body() data: CreatePermisssionsDTO,
   ) {
     return this.permissionsService.createPermission(id, data.permissions);
   }
 
-  @Delete('remove')
+  @Patch('remove')
   async removePermission(
     @Param('id') id: string,
-    @Body() data: { permissions: PermissionList[] },
+    @Body() data: CreatePermisssionsDTO,
   ) {
     return this.permissionsService.removePermission(id, data.permissions);
   }
