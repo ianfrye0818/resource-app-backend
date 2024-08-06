@@ -38,6 +38,6 @@ export const ErrorMessages = {
   InvalidFileType:
     'Invalid file type. Only PDF, DOCX, and DOC files are allowed.',
   Unauthorized: 'You are not authroized to access this resource',
-  UserExists: 'One or more users already exist',
+  Duplicate: 'One or more of these items already exist in the database',
   NotFound: 'The resource you are trying to access was not found',
 };

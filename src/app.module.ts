@@ -8,6 +8,9 @@ import { UserModule } from './user/user.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { ResumeParserModule } from './resume-parser/resume-parser.module';
 import { QrCodeModule } from './qr_code/qr_code.module';
+import { EcolabEmployeeModule } from './(ecolab)/ecolab-employee/ecolab-employee.module';
+import { EcolabAssignmentModule } from './(ecolab)/ecolab-assignment/ecolab-assignment.module';
+import { EcolabManagerModule } from './(ecolab)/ecolab-manager/ecolab-manager.module';
 
 @Module({
   imports: [
@@ -22,6 +25,9 @@ import { QrCodeModule } from './qr_code/qr_code.module';
     PermissionsModule,
     ResumeParserModule,
     QrCodeModule,
+    EcolabEmployeeModule,
+    EcolabAssignmentModule,
+    EcolabManagerModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

@@ -8,21 +8,20 @@ datasource db {
 }
 
 model User {
-  userId    String    @id @default(cuid())
-  firstName String
-  lastName  String
-  email     String    @unique
-  password  String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  deletedAt DateTime?
-  isActive  Boolean   @default(true)
-  role      Role      @default(USER)
-
+  userId        String           @id @default(cuid())
+  firstName     String
+  lastName      String
+  email         String           @unique
+  password      String
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  deletedAt     DateTime?
+  isActive      Boolean          @default(true)
+  role          Role             @default(USER)
   permissions   PermissionList[] @default([])
   refreshTokens RefreshToken[]
   qrCodes       QR_Codes[]
-  firstLogin    Boolean @default(true)
+  firstLogin    Boolean          @default(true)
 }
 
 model QR_Codes {
@@ -45,21 +44,105 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [userId], onDelete: Cascade)
 }
 
+model EcolabEmployee {
+  bullhornId String   @id
+  firstName  String
+  lastName   String
+  birthDate  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  assignments EcolabAssignments[] @relation("EmployeeAssignments")
+}
+
+model EcolabAssignments {
+  beelineRequestId        String                  @id
+  startDate               DateTime
+  dtCompletedDate         DateTime
+  backgroundCompletedDate DateTime
+  endDate                 DateTime?
+  position                EcolabPosition
+  shift                   EcolabShift
+  payRate                 Float
+  ctsUserId               String                  @default(cuid())
+  terminationReason       EcolabTerminationReason?
+  terminationNotes        String?
+
+  ctsUser   EcolabManager    @relation(fields: [ctsUserId], references: [id])
+  employees EcolabEmployee[] @relation("EmployeeAssignments")
+}
+
+model EcolabManager {
+  id          String              @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String?             @unique
+  phone       String?
+  location    EcolabLocation
+  assignments EcolabAssignments[]
+}
+
+enum EcolabLocation {
+  WINSTON_SALEM
+  GREENSBORO
+}
+
+enum EcolabTerminationReason {
+  TERMINATED_PERFORMANCE
+  TERMINATED_POLICY_VIOLATION
+  TERMINATED_ATTENDANCE
+  TERMINATED_OTHER
+  QUIT_NOT_ELIGIBLE_FOR_REHIRE
+  QUIT_ELIGIBLE_FOR_REHIRE
+  HIRED_PERM
+  PROJECT_COMPLETE
+  ASSIGNMENT_COMPLETE
+  OVER_ONE_YEAR_ASSIGNMENT
+}
+
+enum EcolabPosition {
+  FORKLIFT_1
+  GENERAL_LABOR_1
+  ASSEMBLER_1
+  WAREHOUSE_1
+}
+
+enum EcolabShift {
+  FIRST
+  SECOND
+  THIRD
+}
+
 enum Role {
   ADMIN
   USER
 }
 
 enum PermissionList {
+  GET_USERS
   CREATE_USER
   UPDATE_USER
   DELETE_USER
+  GET_PERMISSIONS
   CREATE_PERMISSION
   UPDATE_PERMISSION
   DELETE_PERMISSION
+  GET_ROLES
   CREATE_ROLE
   UPDATE_ROLE
   DELETE_ROLE
   GENERATE_RESUME
   GENERATE_QR_CODE
+  GET_ECOLAB_ASSIGNMENTS
+  CREATE_ECOLAB_ASSIGNEMNTS
+  UPDATE_ECOLAB_ASSIGNMENTS
+  DELETE_ECOLAB_ASSIGNMENTS
+  GET_ECOLAB_EMPLOYEES
+  CREATE_ECOLAB_EMPLOYEES
+  UPDATE_ECOLAB_EMPLOYEES
+  DELETE_ECOLAB_EMPLOYEES
+  GET_ECOLAB_MANAGERS
+  CREATE_ECOLAB_MANAGERS
+  UPDATE_ECOLAB_MANAGERS
+  DELETE_ECOLAB_MANAGERS
 }

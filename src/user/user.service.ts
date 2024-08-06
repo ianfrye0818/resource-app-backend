@@ -18,7 +18,6 @@ import { CSVParserService } from 'src/core-services/csv-parser.service';
 import { ErrorMessages } from 'src/lib/data';
 import { CreateUserDTO } from './dto/createUser.dto';
 import { CreateUserSchema } from 'src/lib/zod-schemas';
-import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class UserService {
@@ -145,7 +144,7 @@ export class UserService {
       }
 
       if (error.code === 'P2002' || error.code === 'P2020') {
-        throw new ConflictException(ErrorMessages.UserExists);
+        throw new ConflictException(ErrorMessages.Duplicate);
       }
 
       if (error instanceof HttpException) {
