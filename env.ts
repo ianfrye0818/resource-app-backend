@@ -12,6 +12,10 @@ const envSchema = z.object({
   GOOGLE_API_KEY: z.string(),
   ANTHROPIC_API_KEY: z.string(),
   OPENAI_API_KEY: z.string(),
+  CLOUDINARY_API_KEY: z.string(),
+  CLOUDINARY_API_SECRET: z.string(),
+  CLOUDINARY_CLOUD_NAME: z.string(),
+  CLOUDINARY_URL: z.string(),
 });
 
 export const env = envSchema.parse(process.env);

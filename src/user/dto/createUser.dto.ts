@@ -1,5 +1,5 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { PermissionList, Role } from '@prisma/client';
+import { RoleList } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import {
   IsEmail,
@@ -24,9 +24,19 @@ export class CreateUserDTO {
   password: string;
 
   @IsOptional()
-  @IsEnum(['ADMIN', 'USER'], {})
-  @Transform(({ value }: { value: string }) => value.toUpperCase())
-  role?: Role;
+  @IsEnum(['ADMIN', 'USER'], { each: true })
+  @Transform(({ value }: { value: string[] }) => {
+    const roles = value.reduce((acc: RoleList[], role: string) => {
+      if (isNaN(Number(role)) && role.toUpperCase() in RoleList) {
+        acc.push(role.toUpperCase() as RoleList);
+      }
+
+      return acc;
+    }, []);
+
+    return roles;
+  })
+  roles?: RoleList[];
 
   @IsOptional()
   @IsBoolean()
@@ -41,4 +51,8 @@ export class UpdateUserDTO extends PartialType(CreateUserDTO) {
   @IsOptional()
   @IsBoolean()
   firstLogin?: boolean;
+
+  @IsOptional()
+  @IsString()
+  avatarUrl?: string;
 }

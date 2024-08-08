@@ -12,8 +12,8 @@ import {
   UseInterceptors,
   Res,
   UploadedFile,
-  UnprocessableEntityException,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { UserService } from './user.service';
@@ -23,14 +23,13 @@ import { FilterUserDTO } from './dto/filterUser.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { CreateUserDTO, UpdateUserDTO } from './dto/createUser.dto';
-import { ErrorMessages } from 'src/lib/data';
 
 // @UseGuards(JwtGuard)
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseGuards(AdminGuard)
+  // @UseGuards(AdminGuard)
   @Get()
   async findAllUsers(@Query() query: FilterUserDTO) {
     return await this.userService.findAllUsers(query);
@@ -42,14 +41,14 @@ export class UserController {
   }
 
   // @UseGuards(AdminGuard)
-  @Post('/import')
+  @Post('import')
   @UseInterceptors(FileInterceptor('file'))
   async importUsers(@UploadedFile() file: Express.Multer.File) {
     return await this.userService.parseAndCreateUsers(file);
   }
 
   // @UseGuards(AdminGuard)
-  @Post('/export')
+  @Post('export')
   async exportUsers(@Res() res: Response) {
     const exportedUsers = await this.userService.exportUsersToCSV();
 
@@ -69,49 +68,67 @@ export class UserController {
     res.send(exportedUsers);
   }
 
-  @UseGuards(AdminGuard)
-  @Post('/create')
+  // @UseGuards(AdminGuard)
+  @Post('create')
   async createUser(@Body() data: CreateUserDTO) {
     return await this.userService.create(data);
   }
 
   // @UseGuards(UpdateUserGuard)
-  @Patch(':id')
-  async updateUserById(@Param('id') id: string, @Body() data: UpdateUserDTO) {
+  @Patch(':userId')
+  async updateUserById(
+    @Param('userId') userId: string,
+    @Body() data: UpdateUserDTO,
+  ) {
     if (Object.keys(data).length === 0) {
       throw new BadRequestException(
         'The provided data cannot be updated with this endpoint',
       );
     }
-    return await this.userService.updateUserById(id, data);
+    return await this.userService.updateUserById(userId, data);
   }
 
   // @UseGuards(UpdateUserGuard)
-  @Patch(':id/flip-first-login-status')
-  async flipFirstLoginStatus(@Param('id') id: string) {
-    return await this.userService.flipFirstLoginStatus(id);
+  @Patch(':userId/flip-first-login-status')
+  async flipFirstLoginStatus(@Param('userId') userId: string) {
+    return await this.userService.flipFirstLoginStatus(userId);
   }
 
   @UseGuards(UpdateUserGuard)
-  @Patch(':id/update-password')
+  @Patch(':userId/update-password')
   async updatePassword(
-    @Param('id') id: string,
+    @Param('userId') userId: string,
     @Body() data: { password: string },
   ) {
-    return await this.userService.updateUserById(id, {
+    return await this.userService.updateUserById(userId, {
       password: data.password,
     });
   }
 
-  @UseGuards(UpdateUserGuard)
-  @Patch(':id/restore')
-  async restoreUserById(@Param('id') id: string) {
-    return await this.userService.restoreUserById(id);
+  // @UseGuards(UpdateUserGuard)
+  @Post(':userId/upload-avatar')
+  @UseInterceptors(FileInterceptor('avatar'))
+  async uploadAvatar(
+    @Param('userId') userId: string,
+    @UploadedFile() avatar: Express.Multer.File,
+  ) {
+    return await this.userService.uploadAvatar(userId, avatar);
+  }
+
+  @Get(':userId/images')
+  async getUserImages(@Param('userId') userId: string) {
+    return await this.userService.getUserImages(userId);
   }
 
   @UseGuards(UpdateUserGuard)
-  @Delete(':id')
-  async deleteUserById(@Param('id') id: string) {
-    return await this.userService.softDeleteUserById(id);
+  @Patch(':userId/restore')
+  async restoreUserById(@Param('userId') userId: string) {
+    return await this.userService.restoreUserById(userId);
+  }
+
+  @UseGuards(UpdateUserGuard)
+  @Delete(':userId')
+  async deleteUserById(@Param('userId') userId: string) {
+    return await this.userService.softDeleteUserById(userId);
   }
 }

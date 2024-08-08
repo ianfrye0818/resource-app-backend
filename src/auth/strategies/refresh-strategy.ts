@@ -19,7 +19,6 @@ export class RefreshStrategy extends PassportStrategy(Strategy, 'refresh') {
 }
 
 function extractJWT(req: Request): string | null {
-  console.log('refreshing token');
   if (req.cookies && req.cookies.refreshToken) {
     return req.cookies.refreshToken;
   }

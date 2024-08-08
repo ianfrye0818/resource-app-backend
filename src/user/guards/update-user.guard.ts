@@ -4,7 +4,7 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { RoleList } from '@prisma/client';
 import { ClientUser } from 'src/lib/types.';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class UpdateUserGuard implements CanActivate {
     const jwtUser = request.user as ClientUser;
     const data = request.body;
 
-    if (jwtUser.role === Role.ADMIN) {
+    if (jwtUser.roles.includes(RoleList.ADMIN)) {
       return true;
     }
 

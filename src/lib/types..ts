@@ -1,9 +1,9 @@
-import { PermissionList, Role } from '@prisma/client';
+import { PermissionList, RoleList } from '@prisma/client';
 
 export interface ClientUser {
   email: string;
   userId: string;
-  role: Role;
+  roles: RoleList[];
   permissions: PermissionList[];
   firstName: string;
   lastName: string;

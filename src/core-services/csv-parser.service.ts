@@ -15,16 +15,13 @@ export class CSVParserService {
     const results: T[] = [];
     const bufferStream = new Readable();
     bufferStream.push(file.buffer);
-    bufferStream.push(null); // End of the stream
-
-    // Define headerMap as a global variable in the service
+    bufferStream.push(null);
     const headerMap: { [key: string]: string } = {};
 
     return new Promise((resolve, reject) => {
       bufferStream
         .pipe(csv())
         .on('headers', (headers) => {
-          // Create the header map
           headers.forEach((header) => {
             if (headerMapping[header]) {
               headerMap[header] = headerMapping[header].toString();
@@ -32,12 +29,10 @@ export class CSVParserService {
           });
         })
         .on('data', (data) => {
-          console.log({ data });
           const transformedData = this.transformData(data, headerMap);
           results.push(transformedData);
         })
         .on('end', () => {
-          console.log({ results });
           resolve(results);
         })
         .on('error', (error) => reject(error));
@@ -58,11 +53,10 @@ export class CSVParserService {
 
     try {
       await csWriter.writeRecords(data);
-      console.log('The CSV file was written successfully');
       const file = fs.readFileSync(`./${fileName}.csv`);
       return file;
     } catch (error) {
-      console.log(['csv-parser.service', 'exportToCSV'], error);
+      console.error(['csv-parser.service', 'exportToCSV'], error);
       throw new Error('Falied to Write to CSV File');
     }
   }

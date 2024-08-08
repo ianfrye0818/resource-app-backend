@@ -5,7 +5,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { RoleList } from '@prisma/client';
 import { ErrorMessages } from 'src/lib/data';
 import { ClientUser } from 'src/lib/types.';
 
@@ -23,7 +23,9 @@ export class AdminGuard implements CanActivate {
         'Must be logged in to access this resource',
       );
 
-    if (user.role === Role.ADMIN) return true;
+    if (user.roles.includes(RoleList.ADMIN)) {
+      return true;
+    }
 
     throw new ForbiddenException(ErrorMessages.Unauthorized);
   }

@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { Cron } from '@nestjs/schedule';
-import { Prisma, User } from '@prisma/client';
+import { Prisma, RoleList, User } from '@prisma/client';
 import { FilterUserDTO } from './dto/filterUser.dto';
 import { PrismaService } from 'src/core-services/prisma-service.service';
 import { generateClientSideUserProperties } from 'src/lib/utils';
@@ -18,12 +18,14 @@ import { CSVParserService } from 'src/core-services/csv-parser.service';
 import { ErrorMessages } from 'src/lib/data';
 import { CreateUserDTO } from './dto/createUser.dto';
 import { CreateUserSchema } from 'src/lib/zod-schemas';
+import { CloudinaryService } from 'src/core-services/cloudinary.service';
 
 @Injectable()
 export class UserService {
   constructor(
     private prismaService: PrismaService,
     private csvParserService: CSVParserService,
+    private readonly cloudinaryService: CloudinaryService,
     // private emailService: EmailService,
   ) {}
 
@@ -32,11 +34,11 @@ export class UserService {
     try {
       const users = await this.prismaService.user.findMany({
         where: {
-          role: { in: roles },
+          roles: { hasSome: roles as RoleList[] },
           ...otherFilters,
         },
         orderBy: [
-          { role: sort || 'desc' },
+          { roles: sort || 'desc' },
           { lastName: 'asc' },
           { userId: 'asc' },
         ],
@@ -44,6 +46,7 @@ export class UserService {
         take,
         skip: skip || 0,
       });
+
       return users.map((user) => generateClientSideUserProperties(user));
     } catch (error) {
       console.error(error);
@@ -93,7 +96,6 @@ export class UserService {
         email: formattedEmail,
       },
     });
-
     return generateClientSideUserProperties(newUser);
   }
   catch(error) {
@@ -111,7 +113,7 @@ export class UserService {
         'Last Name': 'lastName',
         Email: 'email',
         Password: 'password',
-        Role: 'role',
+        Roles: 'roles',
         Active: 'isActive',
       };
 
@@ -158,13 +160,12 @@ export class UserService {
   async exportUsersToCSV() {
     try {
       const users = await this.findAllUsers();
-
       const headers = [
         { id: 'userId' as const, title: 'User ID' },
         { id: 'firstName' as const, title: 'First Name' },
         { id: 'lastName' as const, title: 'Last Name' },
         { id: 'email' as const, title: 'Email' },
-        { id: 'role' as const, title: 'Role' },
+        { id: 'roles' as const, title: 'Roles' },
         { id: 'isActive' as const, title: 'Active' },
         { id: 'permissions' as const, title: 'Permissions' },
       ];
@@ -194,6 +195,33 @@ export class UserService {
         throw new HttpException('User not found', 404);
       }
       throw new InternalServerErrorException(ErrorMessages.Unknown);
+    }
+  }
+
+  async uploadAvatar(userId: string, file: Express.Multer.File) {
+    try {
+      const imageData = await this.cloudinaryService.uploadImage(userId, file);
+
+      await this.updateUserById(userId, {
+        avatarUrl: imageData.secure_url,
+      });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { api_key, ...rest } = imageData;
+      return rest;
+    } catch (error) {
+      console.error(['userService.uploadAvatar'], error);
+      throw new HttpException(ErrorMessages.Unknown, 500);
+    }
+  }
+
+  async getUserImages(userId: string) {
+    try {
+      const images = await this.cloudinaryService.getImages(userId);
+      const urls = images.resources.map((image) => image.url);
+      return urls;
+    } catch (error) {
+      console.error(['getUserImages'], error);
+      throw new HttpException(ErrorMessages.Unknown, 500);
     }
   }
 

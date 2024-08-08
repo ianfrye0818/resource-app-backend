@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import { RoleList } from '@prisma/client';
 import { Transform, Type } from 'class-transformer';
 import { IsDate, IsEnum, IsInt, IsOptional, IsString } from 'class-validator';
 
@@ -24,9 +24,9 @@ export class FilterUserDTO {
     return value
       .toUpperCase()
       .split(',')
-      .map((role: string) => role as Role);
+      .map((role: string) => role as RoleList);
   })
-  roles?: Role[];
+  roles?: RoleList[];
 
   @IsOptional()
   @IsDate()

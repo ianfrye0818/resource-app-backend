@@ -17,11 +17,12 @@ model User {
   updatedAt     DateTime         @updatedAt
   deletedAt     DateTime?
   isActive      Boolean          @default(true)
-  role          Role             @default(USER)
+  roles         RoleList[]       @default([USER])
   permissions   PermissionList[] @default([])
   refreshTokens RefreshToken[]
   qrCodes       QR_Codes[]
   firstLogin    Boolean          @default(true)
+  avatarUrl     String?
 }
 
 model QR_Codes {
@@ -56,7 +57,7 @@ model EcolabEmployee {
 }
 
 model EcolabAssignments {
-  beelineRequestId        String                  @id
+  beelineRequestId        String                   @id
   startDate               DateTime
   dtCompletedDate         DateTime
   backgroundCompletedDate DateTime
@@ -64,7 +65,7 @@ model EcolabAssignments {
   position                EcolabPosition
   shift                   EcolabShift
   payRate                 Float
-  ctsUserId               String                  @default(cuid())
+  ctsUserId               String                   @default(cuid())
   terminationReason       EcolabTerminationReason?
   terminationNotes        String?
 
@@ -113,7 +114,7 @@ enum EcolabShift {
   THIRD
 }
 
-enum Role {
+enum RoleList {
   ADMIN
   USER
 }

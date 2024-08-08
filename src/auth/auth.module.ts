@@ -9,6 +9,7 @@ import { LocalStrategy } from './strategies/local-strategy';
 import { JwtStrategy } from './strategies/jwt-strategy';
 import { RefreshStrategy } from './strategies/refresh-strategy';
 import { CSVParserService } from 'src/core-services/csv-parser.service';
+import { CloudinaryService } from 'src/core-services/cloudinary.service';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CSVParserService } from 'src/core-services/csv-parser.service';
     JwtStrategy,
     RefreshStrategy,
     CSVParserService,
+    CloudinaryService,
   ],
   exports: [AuthService],
 })
