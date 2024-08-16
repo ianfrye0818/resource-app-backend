@@ -7,32 +7,29 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RoleList } from '@prisma/client';
-import { ErrorMessages } from 'src/lib/data';
-import { ClientUser } from 'src/lib/types.';
+import { ClientUser } from 'src/lib/types.'; // Adjust path as needed
 
 @Injectable()
 export class RoleGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.get<RoleList[]>(
-      'roles',
+    const requiredRole = this.reflector.get<RoleList>(
+      'role',
       context.getHandler(),
     );
-    if (!requiredRoles) {
-      return true;
+    if (!requiredRole) {
+      return true; // No role required for this route
     }
 
     const request = context.switchToHttp().getRequest();
-    const userRoles = (request.user as ClientUser)?.roles || [];
+    const user = request.user as ClientUser;
 
-    const hasRole = requiredRoles.every((role) => userRoles.includes(role));
-    if (!hasRole) {
-      throw new ForbiddenException(ErrorMessages.Unauthorized);
+    if (!user.roles.includes(requiredRole)) {
+      throw new ForbiddenException('You do not have the required role');
     }
     return true;
   }
 }
 
-export const Permissions = (...roles: RoleList[]) =>
-  SetMetadata('roles', roles);
+export const Roles = (role: RoleList) => SetMetadata('role', role);

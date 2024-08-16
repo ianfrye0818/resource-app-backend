@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Patch, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { AdminGuard } from 'src/core-guards/admin.guard';
 import { PermissionsService } from './permissions.service';
@@ -8,6 +8,11 @@ import { CreatePermisssionsDTO } from './dto/create-permissions.dto';
 @Controller('user/:id/permissions')
 export class PermissionsController {
   constructor(private permissionsService: PermissionsService) {}
+
+  @Get()
+  async getUserPermissions(@Param('id') id: string) {
+    return this.permissionsService.getUserPermissions(id);
+  }
 
   @Patch('add')
   async createPermission(

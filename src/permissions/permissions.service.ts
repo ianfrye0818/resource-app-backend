@@ -6,6 +6,16 @@ import { UserService } from 'src/user/user.service';
 export class PermissionsService {
   constructor(private readonly userService: UserService) {}
 
+  async getUserPermissions(userId: string) {
+    try {
+      const user = await this.userService.findOneById(userId);
+      return user.permissions;
+    } catch (error) {
+      console.error(['Error in PermissionsService.getUserPermissions', error]);
+      return [];
+    }
+  }
+
   async createPermission(userId: string, permissions: PermissionList[]) {
     const user = await this.userService.findOneById(userId);
     return await this.userService.updateUserById(userId, {

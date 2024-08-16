@@ -12,7 +12,6 @@ import { ResumeParserService } from './resume-parser.service';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
-
 @UseGuards(JwtGuard)
 @Controller('resume-parser')
 export class ResumeParserController {

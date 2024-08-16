@@ -1,10 +1,12 @@
 import { PartialType } from '@nestjs/mapped-types';
 import {
+  EcolabLocation,
   EcolabPosition,
   EcolabShift,
   EcolabTerminationReason,
 } from '@prisma/client';
 import {
+  IsBoolean,
   IsDate,
   IsEnum,
   IsNumber,
@@ -25,8 +27,14 @@ export class CreateEcolabAssignmentDTO {
   @IsDate()
   backgroundCompletedDate: Date;
 
+  @IsBoolean()
+  educationVerified: boolean;
+
   @IsEnum(EcolabPosition)
   position: EcolabPosition;
+
+  @IsEnum(EcolabLocation)
+  location: EcolabLocation;
 
   @IsEnum(EcolabShift)
   shift: EcolabShift;
@@ -43,13 +51,13 @@ export class UpdateEcolabAssignmentDTO extends PartialType(
 ) {
   @IsOptional()
   @IsDate()
-  endDate: Date;
+  endDate?: Date;
 
   @IsOptional()
   @IsEnum(EcolabTerminationReason)
-  terminationReason: EcolabTerminationReason;
+  terminationReason?: EcolabTerminationReason;
 
   @IsOptional()
   @IsString()
-  terminationNotes: string;
+  terminationNotes?: string;
 }

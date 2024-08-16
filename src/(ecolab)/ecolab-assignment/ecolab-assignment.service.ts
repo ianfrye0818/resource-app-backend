@@ -9,14 +9,17 @@ import {
   CreateEcolabAssignmentDTO,
   UpdateEcolabAssignmentDTO,
 } from './dto/create-ecolab-assignment.dto';
+import { FilterAssignmentDTO } from './dto/filter-assignment.dto';
 
 @Injectable()
 export class EcolabAssignmentService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async findAll() {
+  async findAll(filter: FilterAssignmentDTO) {
     try {
-      return await this.prismaService.ecolabAssignments.findMany();
+      return await this.prismaService.ecolabAssignments.findMany({
+        where: { ...filter },
+      });
     } catch (error) {
       console.error(['Error in EcolabAssignmentService.findAll', error]);
       return [];

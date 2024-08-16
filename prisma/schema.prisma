@@ -23,6 +23,7 @@ model User {
   qrCodes       QR_Codes[]
   firstLogin    Boolean          @default(true)
   avatarUrl     String?
+  chatPadChats  ChatpPadChats[]
 }
 
 model QR_Codes {
@@ -61,9 +62,11 @@ model EcolabAssignments {
   startDate               DateTime
   dtCompletedDate         DateTime
   backgroundCompletedDate DateTime
+  educationVerified      Boolean
   endDate                 DateTime?
   position                EcolabPosition
   shift                   EcolabShift
+  location                EcolabLocation
   payRate                 Float
   ctsUserId               String                   @default(cuid())
   terminationReason       EcolabTerminationReason?
@@ -71,6 +74,39 @@ model EcolabAssignments {
 
   ctsUser   EcolabManager    @relation(fields: [ctsUserId], references: [id])
   employees EcolabEmployee[] @relation("EmployeeAssignments")
+}
+
+model ChatpPadChats {
+  id        String   @id @default(cuid())
+  description String
+  totalTokens Int
+  createdAt  DateTime @default(now())
+  pinned     Boolean  @default(false)
+  userId     String
+  user      User     @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  messages  ChatPadMessage[]
+}
+
+
+enum ChatPadRole {
+  SYSTEM
+  ASSISTANT
+  USER
+}
+model ChatPadMessage {
+  id        String   @id @default(cuid())
+  chatId    String
+  chat     ChatpPadChats @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  role    ChatPadRole
+  content  String
+  createdAt DateTime @default(now())
+}
+
+model ChatPadPrompt {
+  id       String   @id @default(cuid())
+  title   String
+  content String
+  createdAt DateTime @default(now())
 }
 
 model EcolabManager {
@@ -117,10 +153,12 @@ enum EcolabShift {
 enum RoleList {
   ADMIN
   USER
+  ECOLAB
 }
 
 enum PermissionList {
   GET_USERS
+  GET_USER
   CREATE_USER
   UPDATE_USER
   DELETE_USER

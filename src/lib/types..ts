@@ -42,3 +42,5 @@ export interface ParsedJson {
     duties?: string[];
   };
 }
+
+export type PermissionMap = Record<RoleList, PermissionList[]>;

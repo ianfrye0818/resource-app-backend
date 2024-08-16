@@ -52,12 +52,12 @@ export class AuthService {
   // }
 
   async login(payload: ClientUser) {
-    const refreshToken = this.generateRefreshToken(payload);
     // await this.refreshTokenService.updateUserRefreshToken({
     //   newToken: refreshToken,
     //   userId: payload.userId,
     // });
 
+    const refreshToken = this.generateRefreshToken(payload);
     const accessToken = this.generateAccessToken(payload);
 
     return {

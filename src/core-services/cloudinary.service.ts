@@ -9,6 +9,7 @@ export class CloudinaryService {
   private API_SECRET: string = env.CLOUDINARY_API_SECRET;
   private CLOUD_NAME: string = env.CLOUDINARY_CLOUD_NAME;
   private cloudinaryConfig: Record<string, string>;
+
   constructor() {
     this.cloudinaryConfig = {
       cloud_name: this.CLOUD_NAME,

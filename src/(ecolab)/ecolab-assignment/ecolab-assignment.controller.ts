@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
@@ -19,6 +20,7 @@ import {
   UpdateEcolabAssignmentDTO,
 } from './dto/create-ecolab-assignment.dto';
 import { PermissionList } from '@prisma/client';
+import { FilterAssignmentDTO } from './dto/filter-assignment.dto';
 
 @UseGuards(JwtGuard, PermissionsGuard)
 @Controller('ecolab-assignment')
@@ -29,8 +31,8 @@ export class EcolabAssignmentController {
 
   @Permissions(PermissionList.GET_ECOLAB_ASSIGNMENTS)
   @Get()
-  async findAll() {
-    return await this.ecolabAssignmentService.findAll();
+  async findAll(@Query('location') location: FilterAssignmentDTO) {
+    return await this.ecolabAssignmentService.findAll(location);
   }
 
   @Permissions(PermissionList.GET_ECOLAB_ASSIGNMENTS)

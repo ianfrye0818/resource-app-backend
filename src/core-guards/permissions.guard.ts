@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PermissionList } from '@prisma/client';
+import { permissionMap } from 'src/lib/constants';
 import { ErrorMessages } from 'src/lib/data';
 import { ClientUser } from 'src/lib/types.';
 
@@ -24,11 +25,14 @@ export class PermissionsGuard implements CanActivate {
     }
 
     const request = context.switchToHttp().getRequest();
-    const userPermissions = (request.user as ClientUser)?.permissions || [];
+    const user = request.user as ClientUser;
 
-    const hasPermission = requiredPermissions.every((permission) =>
-      userPermissions.includes(permission),
-    );
+    const hasPermission = user.roles.some((role) => {
+      return permissionMap[role].some((permission) =>
+        requiredPermissions.includes(permission),
+      );
+    });
+
     if (!hasPermission) {
       throw new ForbiddenException(ErrorMessages.Unauthorized);
     }
